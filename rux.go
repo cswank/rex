@@ -5,12 +5,19 @@ import (
 	"strings"
 )
 
-var tree *Tree
+var (
+	routers map[string]*Router
+)
 
-type handler func(w http.ResponseWriter, req *http.Request)
+type handler func(http.ResponseWriter, *http.Request)
 
-func New() *Tree {
-	tree = &Tree{
+func init() {
+	routers = map[string]*Router{}
+}
+
+func New(name string) *Router {
+	r := &Router{
+		handlers: map[string]http.Handler{},
 		methods: map[string]*node{
 			"GET":    newNode(),
 			"POST":   newNode(),
@@ -19,51 +26,66 @@ func New() *Tree {
 			"PATCH":  newNode(),
 		},
 	}
-	return tree
+	routers[name] = r
+	return r
 }
 
-type Tree struct {
-	methods map[string]*node
+type Router struct {
+	handlers map[string]http.Handler
+	methods  map[string]*node
 }
 
-func (t *Tree) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	n, ok := t.methods[r.Method]
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	n, ok := r.methods[req.Method]
 	if !ok {
-		notFound(w)
+		h, ok := r.handlers[req.URL.Path]
+		if !ok {
+			notFound(w)
+		} else {
+			h.ServeHTTP(w, req)
+		}
 	} else {
-		n.handle(strings.Split(strings.Trim(r.URL.Path, "/"), "/"), w, r)
+		n.handle(strings.Split(strings.Trim(req.URL.Path, "/"), "/"), w, req)
 	}
 }
 
-func Vars(r *http.Request) map[string]string {
+func Vars(r *http.Request, name string) map[string]string {
 	pth := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	m := map[string]string{}
-	tree.methods[r.Method].vars(pth, m)
+	t, ok := routers[name]
+	if !ok {
+		return m
+	}
+	t.methods[r.Method].vars(pth, m)
 	return m
 }
 
-func (t *Tree) Get(pth string, h handler) *node {
-	return t.method("GET", pth, h)
+func (r *Router) PathPrefix(pth string, h http.Handler) {
+	r.handlers[pth] = h
 }
 
-func (t *Tree) Post(pth string, h handler) *node {
-	return t.method("POST", pth, h)
+func (r *Router) Get(pth string, h handler) *node {
+	return r.method("GET", pth, h)
 }
 
-func (t *Tree) Put(pth string, h handler) *node {
-	return t.method("PUT", pth, h)
+func (r *Router) Post(pth string, h handler) *node {
+	return r.method("POST", pth, h)
 }
 
-func (t *Tree) Delete(pth string, h handler) *node {
-	return t.method("DELETE", pth, h)
+func (r *Router) Put(pth string, h handler) *node {
+	return r.method("PUT", pth, h)
 }
 
-func (t *Tree) Path(pth string, h handler) *node {
-	return t.method("PATCH", pth, h)
+func (r *Router) Delete(pth string, h handler) *node {
+	return r.method("DELETE", pth, h)
 }
 
-func (t *Tree) method(name, pth string, h handler) *node {
-	return t.methods[name].add(strings.Split(strings.Trim(pth, "/"), "/"), h)
+func (r *Router) Path(pth string, h handler) *node {
+	return r.method("PATCH", pth, h)
+}
+
+func (r *Router) method(name, pth string, h handler) *node {
+	return r.methods[name].add(strings.Split(strings.Trim(pth, "/"), "/"), h)
 }
 
 type node struct {

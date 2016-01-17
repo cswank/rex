@@ -14,7 +14,7 @@ import (
 
 var _ = Describe("Gadgets", func() {
 	var (
-		r      *rux.Tree
+		r      *rux.Router
 		w      *httptest.ResponseRecorder
 		req    *http.Request
 		method string
@@ -69,7 +69,7 @@ var _ = Describe("Gadgets", func() {
 			ww.Write([]byte("color"))
 		}
 
-		r = rux.New()
+		r = rux.New("my router")
 		r.Get("/", root)
 		r.Get("/pals", pals)
 		r.Post("/pals", post)
@@ -148,7 +148,7 @@ var _ = Describe("Gadgets", func() {
 		r.ServeHTTP(w, req)
 		Expect(w.Code).To(Equal(http.StatusOK))
 		Expect(w.Body.String()).To(Equal("colors"))
-		vars := rux.Vars(req)
+		vars := rux.Vars(req, "my router")
 		Expect(vars["id"]).To(Equal("1"))
 	})
 
@@ -159,7 +159,7 @@ var _ = Describe("Gadgets", func() {
 		r.ServeHTTP(w, req)
 		Expect(w.Code).To(Equal(http.StatusOK))
 		Expect(w.Body.String()).To(Equal("color"))
-		vars := rux.Vars(req)
+		vars := rux.Vars(req, "my router")
 		Expect(vars["id"]).To(Equal("3"))
 		Expect(vars["color"]).To(Equal("red"))
 	})
@@ -196,7 +196,7 @@ var _ = Describe("Gadgets", func() {
 		Expect(method).To(Equal("DELETE"))
 		Expect(w.Code).To(Equal(http.StatusOK))
 		Expect(w.Body.String()).To(Equal(""))
-		vars := rux.Vars(req)
+		vars := rux.Vars(req, "my router")
 		Expect(vars["id"]).To(Equal("55"))
 		Expect(vars["color"]).To(Equal("red"))
 	})

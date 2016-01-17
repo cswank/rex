@@ -8,7 +8,7 @@ import (
 )
 
 func BenchmarkMux(b *testing.B) {
-	r := rux.New()
+	r := rux.New("bench")
 	handler := func(w http.ResponseWriter, r *http.Request) {}
 	r.Get("/v1/{v1}", handler)
 
