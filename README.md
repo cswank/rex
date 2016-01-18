@@ -74,7 +74,7 @@ You can also serve files:
     	w.Write([]byte("things"))
     }
 
-The supported HTTP methods are Get, Post, Put, Delete, and Patch.
+The supported HTTP methods are Get, Post, Put, Delete, Patch, and Head.
 
 When you create a new Router you must pass in a name.  When getting
 the vars from a request the name of the router must be passed in.
