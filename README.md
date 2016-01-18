@@ -12,7 +12,7 @@ set or routes like:
 
 Then you should be able to use Rex.  It doesn't match
 routes based on regex and only provides enough functionality
-to work with a RESTful api.  Rex can be used the above
+to work with a RESTful api.  Rex can be used to serve the above
 routes like this:
 
     package main
