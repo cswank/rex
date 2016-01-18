@@ -85,3 +85,66 @@ the vars from a request the name of the router must be passed in.
     	w.Write([]byte("things"))
     }
 
+
+Compared to gorilla/mux it seems to be a bit faster when you
+run the benchmark tests.  Running the rex benchmark:
+
+     package rex_test
+
+     import (
+     	"net/http"
+     	"testing"
+
+     	"github.com/cswank/rex"
+     )
+
+     func BenchmarkMux(b *testing.B) {
+     	r := rex.New("bench")
+     	handler := func(w http.ResponseWriter, r *http.Request) {}
+     	r.Get("/v1/{v1}", handler)
+
+     	request, _ := http.NewRequest("GET", "/v1/anything", nil)
+     	for i := 0; i < b.N; i++ {
+     		r.ServeHTTP(nil, request)
+     	}
+     }    
+
+Gives
+
+    ➜  rex git:(master) go test -bench=.
+    BenchmarkRex-2	 5000000	       370 ns/op
+    ok  	github.com/cswank/rex	2.259s
+
+And running the gorilla/mux benchmark test:
+
+
+    // Copyright 2012 The Gorilla Authors. All rights reserved.
+    // Use of this source code is governed by a BSD-style
+    // license that can be found in the LICENSE file.
+
+    package mux
+
+    import (
+    	"net/http"
+    	"testing"
+    )
+
+    func BenchmarkMux(b *testing.B) {
+    	router := new(Router)
+    	handler := func(w http.ResponseWriter, r *http.Request) {}
+    	router.HandleFunc("/v1/{v1}", handler)
+
+    	request, _ := http.NewRequest("GET", "/v1/anything", nil)
+    	for i := 0; i < b.N; i++ {
+    		router.ServeHTTP(nil, request)
+    	}
+    }
+
+Gives:
+    
+    ➜  mux git:(f15e0c4) go test -bench=.
+    PASS
+    BenchmarkMux-2	  500000	      2728 ns/op
+    ok  	github.com/gorilla/mux	1.418s
+  
+On the same machine.
