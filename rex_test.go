@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path"
 
 	"github.com/cswank/rex"
 
@@ -22,7 +24,14 @@ var _ = Describe("Gadgets", func() {
 	)
 
 	Context("fileserver", func() {
+		var (
+			tmp string
+		)
 		BeforeEach(func() {
+			var err error
+			tmp, err = ioutil.TempDir("", "")
+			Expect(err).To(BeNil())
+			Expect(ioutil.WriteFile(path.Join(tmp, "hello.html"), []byte("hello, world!"), 777)).To(BeNil())
 			method = ""
 			data = ""
 
@@ -34,10 +43,14 @@ var _ = Describe("Gadgets", func() {
 			r = rex.New("my other router")
 			r.Get("/pals", pals)
 
-			r.ServeFiles(http.FileServer(http.Dir("./fixtures")))
+			r.ServeFiles(http.FileServer(http.Dir(tmp)))
 			http.Handle("/", r)
 
 			w = httptest.NewRecorder()
+		})
+
+		AfterEach(func() {
+			os.RemoveAll(tmp)
 		})
 
 		It("gets a file", func() {
