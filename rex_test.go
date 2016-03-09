@@ -35,10 +35,10 @@ var _ = Describe("Gadgets", func() {
 			method = ""
 			data = ""
 
-			pals := func(ww http.ResponseWriter, rr *http.Request) {
+			pals := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				ww.Write([]byte("pals"))
-			}
+			})
 
 			r = rex.New("my other router")
 			r.Get("/pals", pals)
@@ -68,50 +68,50 @@ var _ = Describe("Gadgets", func() {
 		BeforeEach(func() {
 			method = ""
 			data = ""
-			root := func(ww http.ResponseWriter, rr *http.Request) {
+			root := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				ww.Write([]byte("root"))
-			}
+			})
 
-			pals := func(ww http.ResponseWriter, rr *http.Request) {
+			pals := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				ww.Write([]byte("pals"))
-			}
+			})
 
-			post := func(ww http.ResponseWriter, rr *http.Request) {
+			post := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				d, _ := ioutil.ReadAll(rr.Body)
 				data = string(d)
-			}
+			})
 
-			delete := func(ww http.ResponseWriter, rr *http.Request) {
+			delete := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
-			}
+			})
 
-			pal := func(ww http.ResponseWriter, rr *http.Request) {
+			pal := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				ww.Write([]byte("pal"))
-			}
+			})
 
-			pets := func(ww http.ResponseWriter, rr *http.Request) {
+			pets := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				ww.Write([]byte("pets"))
-			}
+			})
 
-			pet := func(ww http.ResponseWriter, rr *http.Request) {
+			pet := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				ww.Write([]byte("pet"))
-			}
+			})
 
-			colors := func(ww http.ResponseWriter, rr *http.Request) {
+			colors := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				ww.Write([]byte("colors"))
-			}
+			})
 
-			color := func(ww http.ResponseWriter, rr *http.Request) {
+			color := http.HandlerFunc(func(ww http.ResponseWriter, rr *http.Request) {
 				method = rr.Method
 				ww.Write([]byte("color"))
-			}
+			})
 
 			r = rex.New("my router")
 			r.Get("/", root)

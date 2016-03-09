@@ -9,7 +9,7 @@ import (
 
 func BenchmarkRex(b *testing.B) {
 	r := rex.New("bench")
-	handler := func(w http.ResponseWriter, r *http.Request) {}
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	r.Get("/v1/{v1}", handler)
 
 	request, _ := http.NewRequest("GET", "/v1/anything", nil)
